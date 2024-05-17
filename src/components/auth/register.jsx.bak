@@ -1,0 +1,79 @@
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setUser as setUserAction } from "../../store/reducer";
+import Cookies from "js-cookie";
+
+export default function Register() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:1337/api/auth/local/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: user.username,
+            email: user.email, // Email valid
+            password: user.password, // Min 6 characters
+          }),
+        },
+      );
+      if (!response.ok) {
+        throw new Error("Something went wrong");
+      }
+      const data = await response.json();
+      const { jwt, user: registeredUser } = data;
+      dispatch(setUserAction(registeredUser));
+      Cookies.set("token", jwt, { expires: 7 });
+      navigate("/profile");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Register</h1>
+      <div className="form-group">
+        <input
+          type="text"
+          name="username"
+          placeholder="User Name"
+          value={user.username}
+          onChange={handleChange}
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={user.email}
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={user.password}
+          onChange={handleChange}
+        />
+        <button onClick={handleSave}>Register</button>
+      </div>
+    </div>
+  );
+}
