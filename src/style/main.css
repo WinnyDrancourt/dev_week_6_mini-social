@@ -1,4 +1,7 @@
 @import "auth.css";
+@import "posts.css";
+@import "profile.css";
+@import "navbar.css";
 
 * {
   margin: 0;
@@ -11,7 +14,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 90vh;
   padding:
     1rem 0,
     5rem;

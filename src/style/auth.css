@@ -24,8 +24,7 @@ input[type="password"] {
   border-radius: 0.25rem;
 }
 
-label,
-button {
+section :is(label, button) {
   margin-top: 1rem;
 }
 
@@ -71,6 +70,9 @@ button {
   margin-bottom: 0.5rem;
 }
 
-.line {
-  display: inline-block;
+.success-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
 }

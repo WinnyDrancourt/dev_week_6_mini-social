@@ -7,33 +7,18 @@ export default function Navbar() {
   return (
     <>
       <nav>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          {user.id ? (
-            <>
-              <li>
-                <div>{user.username}</div>
-              </li>
-              <li>
-                <Link to="/profile">Profile</Link>
-              </li>
-              <li>
-                <Logout />
-              </li>
-            </>
-          ) : (
-            <>
-              <li>
-                <Link to="/register">Register</Link>
-              </li>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-            </>
-          )}
-        </ul>
+        <Link to="/">Home</Link>
+        {user.id ? (
+          <>
+            <Link to="/profile">{user.username}</Link>
+            <Logout />
+          </>
+        ) : (
+          <>
+            <Link to="/register">Register</Link>
+            <Link to="/login">Login</Link>
+          </>
+        )}
       </nav>
     </>
   );

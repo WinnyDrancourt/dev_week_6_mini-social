@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   faCheck,
   faTimes,
@@ -16,22 +16,19 @@ const MAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export default function Register() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const errorRef = useRef();
 
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const [validUser, setValidUser] = useState(false);
   const [userFocus, setUserFocus] = useState(false);
 
-  const [pwd, setPwd] = useState("");
   const [validPwd, setValidPwd] = useState(false);
   const [pwdFocus, setPwdFocus] = useState(false);
 
-  const [pwd2, setPwd2] = useState("");
-  const [validPwd2, setValidPwd2] = useState(false);
-  const [pwd2Focus, setPwd2Focus] = useState(false);
-
-  const [mail, setMail] = useState("");
   const [validMail, setValidMail] = useState(false);
   const [mailFocus, setMailFocus] = useState(false);
 
@@ -39,28 +36,32 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const result = USER_REGEX.test(user);
+    const result = USER_REGEX.test(user.username);
     setValidUser(result);
-  }, [user]);
+  }, [user.username]);
 
   useEffect(() => {
-    const result = PWD_REGEX.test(pwd);
+    const result = PWD_REGEX.test(user.password);
     setValidPwd(result);
-    const result2 = pwd === pwd2;
-    setValidPwd2(result2);
-  }, [pwd, pwd2]);
+  }, [user.password]);
 
   useEffect(() => {
-    const result = MAIL_REGEX.test(mail);
+    const result = MAIL_REGEX.test(user.email);
     setValidMail(result);
-  }, [mail]);
+  }, [user.email]);
 
   useEffect(() => {
     setErrMsg("");
-  }, [user, pwd, pwd2]);
+  }, [user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSave = async () => {
     try {
+      console.log("user", user);
       const response = await fetch(
         "http://localhost:1337/api/auth/local/register",
         {
@@ -75,6 +76,7 @@ export default function Register() {
           }),
         },
       );
+      console.log("response", response);
       if (!response.ok) {
         throw new Error("Something went wrong");
       }
@@ -82,137 +84,127 @@ export default function Register() {
       const { jwt, user: registeredUser } = data;
       dispatch(setUserAction(registeredUser));
       Cookies.set("token", jwt, { expires: 7 });
-      navigate("/profile");
+      setSuccess(true);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <section>
-      <p ref={errorRef} className={errMsg ? "errmsg" : "offscreen"}>
-        {errMsg}
-      </p>
-      <h2>Register</h2>
-      <form>
-        <label htmlFor="user">
-          User :
-          <span className={validUser ? "valid" : "hide"}>
-            <FontAwesomeIcon icon={faCheck} />
-          </span>
-          <span className={validUser || !user ? "hide" : "invalid"}>
-            <FontAwesomeIcon icon={faTimes} />
-          </span>
-        </label>
-        <input
-          type="text"
-          id="user"
-          autoComplete="off"
-          onChange={(e) => setUser(e.target.value)}
-          required
-          onFocus={() => setUserFocus(true)}
-          onBlur={() => setUserFocus(false)}
-        />
-        <p
-          id="uidnote"
-          className={
-            userFocus && user && !validUser ? "instruction" : "offscreen"
-          }
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-          3 to 16 characters.
-          <br />
-          Must begin with a letter.
-          <br />
-          Only letters, numbers, and underscores.
-        </p>
+    <>
+      {success ? (
+        <section className="success-section">
+          <h2>success !</h2>
+          <p>Registration successful!</p>
+          <Link to="/profile">Profile</Link>
+        </section>
+      ) : (
+        <section>
+          <p ref={errorRef} className={errMsg ? "errmsg" : "offscreen"}>
+            {errMsg}
+          </p>
+          <h2>Register</h2>
+          <label htmlFor="user">
+            User :
+            <span className={validUser ? "valid" : "hide"}>
+              <FontAwesomeIcon icon={faCheck} />
+            </span>
+            <span className={validUser || !user.username ? "hide" : "invalid"}>
+              <FontAwesomeIcon icon={faTimes} />
+            </span>
+          </label>
+          <input
+            type="text"
+            name="username"
+            autoComplete="off"
+            value={user.username}
+            onChange={handleChange}
+            required
+            onFocus={() => setUserFocus(true)}
+            onBlur={() => setUserFocus(false)}
+          />
+          <p
+            id="uidnote"
+            className={
+              userFocus && user.username && !validUser
+                ? "instruction"
+                : "offscreen"
+            }
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            3 to 16 characters.
+            <br />
+            Must begin with a letter.
+            <br />
+            Only letters, numbers, and underscores.
+          </p>
 
-        <label htmlFor="password">
-          Password :
-          <span className={validPwd ? "valid" : "hide"}>
-            <FontAwesomeIcon icon={faCheck} />
-          </span>
-          <span className={validPwd || !pwd ? "hide" : "invalid"}>
-            <FontAwesomeIcon icon={faTimes} />
-          </span>
-        </label>
-        <input
-          type="password"
-          id="password"
-          onChange={(e) => setPwd(e.target.value)}
-          required
-          onFocus={() => setPwdFocus(true)}
-          onBlur={() => setPwdFocus(false)}
-        />
-        <p
-          id="pwdnote"
-          className={pwdFocus && !validPwd ? "instruction" : "offscreen"}
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-          Min 6 characters.
-          <br />
-          Must include uppercase, lowercase, and number.
-        </p>
+          <label htmlFor="email">
+            E-Mail :
+            <span className={validMail ? "valid" : "hide"}>
+              <FontAwesomeIcon icon={faCheck} />
+            </span>
+            <span className={validMail || !user.email ? "hide" : "invalid"}>
+              <FontAwesomeIcon icon={faTimes} />
+            </span>
+          </label>
+          <input
+            type="text"
+            name="email"
+            value={user.email}
+            autoComplete="off"
+            onChange={handleChange}
+            required
+            onFocus={() => setMailFocus(true)}
+            onBlur={() => setMailFocus(false)}
+          />
+          <p
+            id="mailnote"
+            className={
+              mailFocus && user.email && !validMail
+                ? "instruction"
+                : "offscreen"
+            }
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            Must be a valid email address.
+          </p>
 
-        <label htmlFor="password2">
-          Password :
-          <span className={validPwd2 && pwd2 ? "valid" : "hide"}>
-            <FontAwesomeIcon icon={faCheck} />
-          </span>
-          <span className={validPwd2 || !pwd2 ? "hide" : "invalid"}>
-            <FontAwesomeIcon icon={faTimes} />
-          </span>
-        </label>
-        <input
-          type="password"
-          id="password2"
-          onChange={(e) => setPwd2(e.target.value)}
-          required
-          onFocus={() => setPwd2Focus(true)}
-          onBlur={() => setPwd2Focus(false)}
-        />
-        <p
-          id="pwd2note"
-          className={pwd2Focus && !validPwd2 ? "instruction" : "offscreen"}
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-          Must match password.
-        </p>
-
-        <label htmlFor="mail">
-          E-Mail :
-          <span className={validMail ? "valid" : "hide"}>
-            <FontAwesomeIcon icon={faCheck} />
-          </span>
-          <span className={validMail || !mail ? "hide" : "invalid"}>
-            <FontAwesomeIcon icon={faTimes} />
-          </span>
-        </label>
-        <input
-          type="text"
-          id="mail"
-          autoComplete="off"
-          onChange={(e) => setMail(e.target.value)}
-          required
-          onFocus={() => setMailFocus(true)}
-          onBlur={() => setMailFocus(false)}
-        />
-        <p
-          id="mailnote"
-          className={
-            mailFocus && mail && !validMail ? "instruction" : "offscreen"
-          }
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-          Must be a valid email address.
-        </p>
-        <button
-          onClick={handleSave}
-          disabled={!validUser || !validPwd || !validPwd2 || !validMail}
-        >
-          Sign Up
-        </button>
-      </form>
-    </section>
+          <label htmlFor="password">
+            Password :
+            <span className={validPwd ? "valid" : "hide"}>
+              <FontAwesomeIcon icon={faCheck} />
+            </span>
+            <span className={validPwd || !user.password ? "hide" : "invalid"}>
+              <FontAwesomeIcon icon={faTimes} />
+            </span>
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={user.password}
+            onChange={handleChange}
+            required
+            onFocus={() => setPwdFocus(true)}
+            onBlur={() => setPwdFocus(false)}
+          />
+          <p
+            id="pwdnote"
+            className={pwdFocus && !validPwd ? "instruction" : "offscreen"}
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            Min 6 characters.
+            <br />
+            Must include uppercase, lowercase, and number.
+          </p>
+          <button
+            onClick={handleSave}
+            disabled={!validUser || !validPwd || !validMail}
+          >
+            Sign Up
+          </button>
+        </section>
+      )}
+    </>
   );
 }
