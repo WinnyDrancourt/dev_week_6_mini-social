@@ -94,7 +94,7 @@ export default function Home() {
 
   return (
     <div className="main-post">
-      {user.id ? (
+      {user.id && (
         <>
           <h2>Posts</h2>
           <form onSubmit={handleSubmit}>
@@ -107,23 +107,22 @@ export default function Home() {
             <button type="submit">Create Post</button>
           </form>
         </>
-      ) : (
-        <h2>Log in to create posts</h2>
       )}
-      ;
       <div className="post-container">
         {posts.map((post) => (
           <div className="post" key={post.id}>
             <p>{post.attributes.text}</p>
             <div className="like">
-              <button onClick={() => handleLike(post.id)}>
-                {post.attributes.users_likes.data.some(
-                  (likeUser) => likeUser.id === user.id,
-                )
-                  ? "Unlike"
-                  : "Like"}
-              </button>
-              <p>{post.attributes.like}</p>
+              {user.id && (
+                <button onClick={() => handleLike(post.id)}>
+                  {post.attributes.users_likes.data.some(
+                    (likeUser) => likeUser.id === user.id,
+                  )
+                    ? "Unlike"
+                    : "Like"}
+                </button>
+              )}
+              <p>Likes Count : {post.attributes.like}</p>
             </div>
           </div>
         ))}

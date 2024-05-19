@@ -9,12 +9,17 @@
   box-sizing: border-box;
 }
 
+.root {
+  display: grid;
+  grid-template-rows: 6rem auto;
+}
+
 main {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  margin-top: 5rem;
   padding:
     1rem 0,
     5rem;
