@@ -1,15 +1,19 @@
-import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
+/*import { persistor } from "../../store/store";
 import { clearUser as clearUserAction } from "../../store/reducer";
-import { persistor } from "../../store/store";
+import { useDispatch } from "react-redux";*/
+import { useSetAtom } from "jotai";
+import { clearUserAtom } from "../../atoms/userAtoms.js";
 
 export default function Logout() {
-  const dispatch = useDispatch();
+  /*  const dispatch = useDispatch();*/
+  const clearUser = useSetAtom(clearUserAtom);
 
   const handleLogout = () => {
     Cookies.remove("token");
-    dispatch(clearUserAction());
-    persistor.purge();
+    clearUser();
+    /*    dispatch(clearUserAction());
+    persistor.purge();*/
     window.location.reload();
   };
 

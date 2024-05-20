@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
-import { setUser as setUserAction } from "../../store/reducer";
+/*import { useDispatch, useSelector } from "react-redux";
+import { setUser as setUserAction } from "../../store/reducer";*/
+import { useAtom, useSetAtom } from "jotai";
+import { userAtom, setUserAtom } from "../../atoms/userAtoms.js";
 
 export default function EditProfile({ onSave }) {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.profile.user);
+  /*const dispatch = useDispatch();
+  const user = useSelector((state) => state.profile.user);*/
+  const user = useAtom(userAtom);
+  const setUser = useSetAtom(setUserAtom);
   const [profile, setProfile] = useState({
-    username: user.username,
-    description: user.description || "",
+    username: user[0].username,
+    description: user[0].description || "",
   });
   const [error, setError] = useState("");
 
@@ -24,7 +28,7 @@ export default function EditProfile({ onSave }) {
     try {
       const token = Cookies.get("token");
       const response = await fetch(
-        `http://localhost:1337/api/users/${user.id}`,
+        `http://localhost:1337/api/users/${user[0].id}`,
         {
           method: "PUT",
           headers: {
@@ -41,7 +45,8 @@ export default function EditProfile({ onSave }) {
         throw new Error("Something went wrong");
       }
       const updatedProfile = await response.json();
-      dispatch(setUserAction(updatedProfile));
+      /*dispatch(setUserAction(updatedProfile));*/
+      setUser(updatedProfile);
       alert("Profile updated successfully");
       onSave();
     } catch (error) {

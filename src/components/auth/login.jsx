@@ -1,17 +1,21 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { setUser as setUserAction } from "../../store/reducer";
+/*import { useDispatch } from "react-redux";
+import { setUser as setUserAction } from "../../store/reducer";*/
+import { useSetAtom } from "jotai";
+import { setUserAtom } from "../../atoms/userAtoms.js";
 
 export default function Login() {
-  const dispatch = useDispatch();
+  /*const dispatch = useDispatch();*/
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({
     identifier: "",
     password: "",
   });
   const [error, setError] = useState("");
+
+  const setUser = useSetAtom(setUserAtom);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,8 +44,10 @@ export default function Login() {
 
       const data = await response.json();
       const { jwt, user: loggedInUser } = data;
-      dispatch(setUserAction(loggedInUser));
+      /*dispatch(setUserAction(loggedInUser));*/
+      setUser(loggedInUser);
       Cookies.set("token", jwt, { expires: 7 });
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
       navigate("/profile");
     } catch (error) {
       setError("Invalid credentials");

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+/*import { useDispatch } from "react-redux";*/
 import { Link } from "react-router-dom";
 import {
   faCheck,
@@ -8,14 +8,17 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Cookies from "js-cookie";
-import { setUser as setUserAction } from "../../store/reducer";
+/*import { setUser as setUserAction } from "../../store/reducer";*/
+import { useSetAtom } from "jotai";
+import { setUserAtom } from "../../atoms/userAtoms.js";
 
 const USER_REGEX = /^[a-zA-Z0-9_]{3,16}$/;
 const PWD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
 const MAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export default function Register() {
-  const dispatch = useDispatch();
+  /*  const dispatch = useDispatch();*/
+  const setUserA = useSetAtom(setUserAtom);
   const errorRef = useRef();
 
   const [user, setUser] = useState({
@@ -82,7 +85,8 @@ export default function Register() {
       }
       const data = await response.json();
       const { jwt, user: registeredUser } = data;
-      dispatch(setUserAction(registeredUser));
+      /*dispatch(setUserAction(registeredUser));*/
+      setUserA(registeredUser);
       Cookies.set("token", jwt, { expires: 7 });
       setSuccess(true);
     } catch (error) {

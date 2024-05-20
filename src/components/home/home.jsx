@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+/*import { useSelector } from "react-redux";*/
 import Cookies from "js-cookie";
+import { useAtom } from "jotai";
+import { userAtom } from "../../atoms/userAtoms.js";
+import { Link } from "react-router-dom";
 
 export default function Home() {
-  const user = useSelector((state) => state.profile.user);
+  /*const user = useSelector((state) => state.profile.user);*/
+  const user = useAtom(userAtom);
   const [posts, setPosts] = useState([]);
   const [newPostText, setNewPostText] = useState("");
 
@@ -29,7 +33,6 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("newPostText", newPostText, "user", user);
       const token = Cookies.get("token");
       const response = await fetch("http://localhost:1337/api/posts", {
         method: "POST",
@@ -38,7 +41,7 @@ export default function Home() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          data: { text: newPostText, author: user.id },
+          data: { text: newPostText, author: user[0].id },
         }),
       });
       console.log("response", response);
@@ -56,13 +59,13 @@ export default function Home() {
     try {
       const post = posts.find((post) => post.id === postId);
       const userLiked = post.attributes.users_likes.data.some(
-        (likeUser) => likeUser.id === user.id,
+        (likeUser) => likeUser.id === user[0].id,
       );
       const updatedLikes = userLiked
         ? post.attributes.users_likes.data.filter(
-            (likeUser) => likeUser.id !== user.id,
+            (likeUser) => likeUser.id !== user[0].id,
           )
-        : [...post.attributes.users_likes.data, user];
+        : [...post.attributes.users_likes.data, user[0]];
       const updatedLikesCount = userLiked
         ? post.attributes.like - 1
         : post.attributes.like + 1;
@@ -94,7 +97,7 @@ export default function Home() {
 
   return (
     <div className="main-post">
-      {user.id && (
+      {user[0].id && (
         <>
           <h2>Posts</h2>
           <form onSubmit={handleSubmit}>
@@ -112,11 +115,14 @@ export default function Home() {
         {posts.map((post) => (
           <div className="post" key={post.id}>
             <p>{post.attributes.text}</p>
+            <Link to={`/profile/${post.attributes.author.data.id}`}>
+              <p>{post.attributes.author.data.attributes.username}</p>
+            </Link>
             <div className="like">
-              {user.id && (
+              {user[0].id && (
                 <button onClick={() => handleLike(post.id)}>
                   {post.attributes.users_likes.data.some(
-                    (likeUser) => likeUser.id === user.id,
+                    (likeUser) => likeUser.id === user[0].id,
                   )
                     ? "Unlike"
                     : "Like"}
